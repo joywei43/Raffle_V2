@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#080a0d" />
+    <meta name="description" content="Everest Poker Room weighted raffle machine for Daily and Weekly draws." />
+    <link rel="icon" type="image/png" href="./everest-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Everest Raffle Machine</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Everest Raffle Machine home">
+          <img class="everest-logo header-logo" src="./everest-logo.png" alt="" />
+          <span><b>EVEREST</b><small>RAFFLE MACHINE</small></span>
+        </a>
+
+        <nav class="pool-tabs" aria-label="Raffle pool">
+          <button class="tab active" type="button" data-pool="daily">Daily</button>
+          <button class="tab" type="button" data-pool="weekly">Weekly</button>
+          <button class="tab" type="button" data-pool="history">History</button>
+        </nav>
+
+        <div class="top-actions">
+          <button class="icon-button" id="fullscreenBtn" type="button" aria-label="Enter fullscreen" title="Fullscreen">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+          </button>
+          <button class="outline-button" id="dataBtn" type="button">Data &amp; Backup</button>
+        </div>
+      </header>
+
+      <main>
+        <section id="raffleView" class="raffle-view">
+          <aside class="control-panel">
+            <div class="pool-heading">
+              <div>
+                <span class="eyebrow" id="poolLabel">DAILY POOL</span>
+                <h1 id="poolTitle">Daily Raffle</h1>
+              </div>
+              <button class="danger-link" id="resetPoolBtn" type="button">Reset pool</button>
+            </div>
+
+            <div class="stats-row" aria-label="Pool totals">
+              <div><span>PLAYERS</span><strong id="playerCount">0</strong></div>
+              <div><span>TICKETS</span><strong id="ticketCount">0</strong></div>
+              <div><span>PRIZES LEFT</span><strong id="prizeCount">0</strong></div>
+            </div>
+
+            <section class="panel-section">
+              <div class="section-title">
+                <h2>Ticket pool</h2>
+                <div class="section-actions"><button class="text-button" id="importPlayersBtn" type="button">↑ Import Excel</button><button class="text-button" id="addPlayerBtn" type="button">+ Add player / tickets</button></div>
+              </div>
+              <form class="quick-add" id="playerForm" hidden>
+                <label>Player name<input id="playerName" autocomplete="off" required placeholder="e.g. JOY" /></label>
+                <label>Member ID<input id="memberId" autocomplete="off" required placeholder="e.g. 80080082" /></label>
+                <label>Tickets<input id="initialTickets" type="number" min="1" step="1" value="1" required /></label>
+                <div class="form-actions"><button class="ghost-button" id="cancelPlayerBtn" type="button">Cancel</button><button class="gold-button" type="submit">Add to pool</button></div>
+              </form>
+              <div class="player-list" id="playerList"></div>
+            </section>
+
+            <section class="panel-section prize-section">
+              <div class="section-title">
+                <h2>Prize queue</h2>
+                <div class="section-actions"><button class="text-button" id="importPrizesBtn" type="button">↑ Import Excel</button><button class="text-button" id="addPrizeBtn" type="button">+ Add prize</button></div>
+              </div>
+              <form class="quick-add prize-form" id="prizeForm" hidden>
+                <label>Prize name<input id="prizeName" autocomplete="off" required placeholder="e.g. ₱5,000" /></label>
+                <label>Quantity<input id="prizeQuantity" type="number" min="1" max="100" step="1" value="1" required /></label>
+                <div class="form-actions"><button class="ghost-button" id="cancelPrizeBtn" type="button">Cancel</button><button class="gold-button" type="submit">Add prize</button></div>
+              </form>
+              <div class="prize-list" id="prizeList"></div>
+            </section>
+          </aside>
+
+          <section class="draw-stage">
+            <div class="stage-header">
+              <div>
+                <span class="eyebrow">NOW DRAWING</span>
+                <h2 id="currentPrize">Add a prize to begin</h2>
+              </div>
+              <label class="switch-row">
+                <span><b>Repeat winners</b><small>Allow the same player to win again</small></span>
+                <input id="repeatToggle" type="checkbox" checked />
+                <i aria-hidden="true"></i>
+              </label>
+            </div>
+
+            <div class="wheel-zone">
+              <div class="wheel-wrap">
+                <div class="pointer" aria-hidden="true"><span></span></div>
+                <div class="wheel" id="wheel" aria-label="Weighted raffle wheel">
+                  <div class="wheel-labels" id="wheelLabels"></div>
+                  <div class="wheel-hub"><img class="everest-logo wheel-logo" src="./everest-logo.png" alt="" /><small>EVEREST</small></div>
+                </div>
+              </div>
+              <div class="empty-wheel" id="emptyWheel">
+                <img class="everest-logo empty-logo" src="./everest-logo.png" alt="Everest Poker Room" />
+                <h3>Add players to the pool</h3>
+                <p>The wheel reflects each player's share of the tickets.</p>
+              </div>
+            </div>
+
+            <div class="draw-controls">
+              <div class="eligibility-note" id="eligibilityNote">Add players and prizes before drawing.</div>
+              <button class="draw-button" id="drawBtn" type="button" disabled><span>SPIN THE WHEEL</span><small id="drawButtonSub">Waiting for pool</small></button>
+              <button class="session-button" id="clearWinnersBtn" type="button">Start new winner session</button>
+            </div>
+
+            <div class="chance-strip" id="chanceStrip"></div>
+          </section>
+        </section>
+
+        <section id="historyView" class="history-view" hidden>
+          <div class="history-heading">
+            <div><span class="eyebrow">AUDIT LOG</span><h1>Raffle History</h1><p>Confirmed results from Daily and Weekly draws.</p></div>
+            <button class="outline-button" id="exportHistoryBtn" type="button">Export CSV</button>
+          </div>
+          <div class="history-table-wrap">
+            <table>
+              <thead><tr><th>Date &amp; time</th><th>Pool</th><th>Prize</th><th>Winner</th><th>Member ID</th><th>Tickets</th><th>Repeat</th></tr></thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+            <div class="empty-history" id="emptyHistory">No confirmed draws yet.</div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="winnerDialog" class="winner-dialog">
+      <div class="confetti" aria-hidden="true"></div>
+      <span class="eyebrow">CONGRATULATIONS</span>
+      <h2 id="winnerName">Winner</h2>
+      <p class="winner-id">MEMBER ID <b id="winnerId">—</b></p>
+      <div class="winner-prize"><span>YOU WON</span><strong id="winnerPrize">Prize</strong></div>
+      <p class="winner-ticket" id="winnerTicketText">1 ticket will be deducted after confirmation.</p>
+      <div class="dialog-actions"><button class="ghost-button" id="cancelResultBtn" type="button">Cancel result</button><button class="gold-button large-button" id="confirmResultBtn" type="button">Confirm winner</button></div>
+    </dialog>
+
+    <dialog id="dataDialog" class="data-dialog">
+      <div class="dialog-heading"><div><span class="eyebrow">LOCAL DATA</span><h2>Data &amp; Backup</h2></div><button class="close-button" data-close-dialog="dataDialog" type="button" aria-label="Close">×</button></div>
+      <p>Raffle data is saved in this browser. Download a backup before moving to another device or clearing browser data.</p>
+      <div class="data-actions"><button class="gold-button" id="backupBtn" type="button">Download backup</button><label class="outline-button file-button">Restore backup<input id="restoreInput" type="file" accept="application/json,.json" /></label></div>
+      <hr />
+      <button class="danger-button" id="resetAllBtn" type="button">Reset all app data</button>
+    </dialog>
+
+    <dialog id="importDialog" class="data-dialog import-dialog">
+      <div class="dialog-heading"><div><span class="eyebrow" id="importPoolLabel">DAILY POOL</span><h2 id="importTitle">Import players</h2></div><button class="close-button" id="closeImportBtn" type="button" aria-label="Close">×</button></div>
+      <p id="importHint">Choose an Excel or CSV file. The first row must contain column names.</p>
+      <label class="import-file">Select .xlsx or .csv file<input id="importFile" type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" /></label>
+      <div id="importOptions" class="import-options"></div>
+      <div id="importPreview" class="import-preview" aria-live="polite"></div>
+      <div class="import-footer"><button class="text-button" id="downloadTemplateBtn" type="button">Download CSV template</button><button class="gold-button" id="applyImportBtn" type="button" disabled>Confirm import</button></div>
+    </dialog>
+
+    <dialog id="confirmDialog" class="confirm-dialog">
+      <span class="eyebrow">PLEASE CONFIRM</span>
+      <h2 id="confirmTitle">Reset this pool?</h2>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="dialog-actions"><button class="ghost-button" id="confirmCancelBtn" type="button">Cancel</button><button class="danger-button" id="confirmActionBtn" type="button">Reset</button></div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="./jszip.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
